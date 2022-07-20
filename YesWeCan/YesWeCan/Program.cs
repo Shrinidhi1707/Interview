@@ -9,7 +9,7 @@ namespace YesWeCan
 {
     class Program
     {
-        private static readonly HttpClient Client = new();
+        private static readonly HttpClient Client = new HttpClient();
         
         static async Task Main(string[] args)
         {

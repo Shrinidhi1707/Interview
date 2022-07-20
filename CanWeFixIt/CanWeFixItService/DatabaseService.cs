@@ -23,14 +23,19 @@ namespace CanWeFixItService
             _connection.Open();
         }
         
-        public IEnumerable<Instrument> Instruments()
+        public async Task<IEnumerable<Instrument>> Instruments()
         {
-            return _connection.QueryAsync<Instrument>("SQL GOES HERE");
+            return await _connection.QueryAsync<Instrument>("Select * FROM instrument where active = 1");
         }
 
-        public async Task<IEnumerable<MarketData>> MarketData()
+        public async Task<IEnumerable<MarketDataDto>> MarketData()
         {
-            return await _connection.QueryAsync<MarketData>("SELECT Id, DataValue FROM MarketData WHERE Active = 0");
+            return await _connection.QueryAsync<MarketDataDto>("Select md.id, datavalue, i.id as instrumentId, md.active FROM marketdata as md INNER JOIN instrument as i on md.sedol = i.sedol WHERE md.active = 1");
+        }
+
+        public async Task<IEnumerable<MarketValuation>> Valuations()
+        {
+            return await _connection.QueryAsync<MarketValuation>("SELECT 'DataValueTotal' as name, SUM(datavalue) as total FROM marketdata WHERE Active = 1");
         }
 
         /// <summary>
@@ -43,7 +48,7 @@ namespace CanWeFixItService
                 CREATE TABLE instrument
                 (
                     id     int,
-                    sedol  text,
+                    sedol  varchar(50),
                     name   text,
                     active int
                 );
@@ -65,7 +70,7 @@ namespace CanWeFixItService
                 (
                     id        int,
                     datavalue int,
-                    sedol     text,
+                    sedol     varchar(50),
                     active    int
                 );
                 INSERT INTO marketdata
